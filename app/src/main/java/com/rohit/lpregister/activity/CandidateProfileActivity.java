@@ -1,8 +1,10 @@
 package com.rohit.lpregister.activity;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -10,6 +12,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,6 +27,11 @@ import android.widget.TextView;
 import com.rohit.lpregister.R;
 import com.rohit.lpregister.database.Constants;
 import com.rohit.lpregister.database.DatabaseHelper;
+import com.rohit.lpregister.model.Candidate;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
+
+import java.io.ByteArrayOutputStream;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -31,9 +39,14 @@ public class CandidateProfileActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,View.OnClickListener, RadioGroup.OnCheckedChangeListener,
         CompoundButton.OnCheckedChangeListener{
 
+
+    private static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 1001;
+    private static final String TAG = "CandidateProfile";
+    byte [] mCandidateImageBytes;
+
     private EditText mEditTextFirstName,mEditTextLastName,mEditTextEmail,mEditTextMobile,mEditTextDob;
 
-    private CircleImageView mImageViewCandidateImage;
+    private ImageView mImageViewCandidateImage;
 
     private RadioGroup mRadioGroupGender;
     // RadioButton object Declaration.
@@ -45,7 +58,7 @@ public class CandidateProfileActivity extends AppCompatActivity
 
     private DatabaseHelper mDatabaseHelper;
 
-    private CircleImageView mHeaderImageViewProfileImage;
+    private ImageView mHeaderImageViewProfileImage;
 
     private TextView mHeaderTextViewName , mHeaderTextViewEmail;
 
@@ -79,6 +92,8 @@ public class CandidateProfileActivity extends AppCompatActivity
 
         getCandidateDataFromDb(getIntent().getStringExtra("email"));
 
+        mImageViewCandidateImage.setEnabled(false);
+
 
     }
 
@@ -90,6 +105,7 @@ public class CandidateProfileActivity extends AppCompatActivity
     private void clickListener() {
 
      mEditUpdateSwitch.setOnCheckedChangeListener(this);
+        mImageViewCandidateImage.setOnClickListener(this);
 
     }
 
@@ -124,6 +140,8 @@ public class CandidateProfileActivity extends AppCompatActivity
     public void initObject(){
 
       mDatabaseHelper = new DatabaseHelper(this);
+
+
 
     }
 
@@ -187,6 +205,18 @@ public class CandidateProfileActivity extends AppCompatActivity
     @Override
     public void onClick(View v) {
 
+       switch (v.getId()){
+           case R.id.update_imageview:
+               openImageFile();
+               break;
+       }
+
+    }
+
+    private void openImageFile() {
+        CropImage.activity()
+                .setGuidelines(CropImageView.Guidelines.ON)
+                .start(CandidateProfileActivity.this);
     }
 
     @Override
@@ -201,12 +231,25 @@ public class CandidateProfileActivity extends AppCompatActivity
      * getData() method definition
      */
     public void getData(){
-
+        String mRegisterGender =null;
+        Candidate candidate = new Candidate();
 
         if (mRadioGroupGender != null) {
 
-            String mRegisterGender = mRadioButton.getText().toString().trim();
+
+            mRegisterGender = mRadioButton.getText().toString().trim();
         }
+
+        candidate.setFirstName(mEditTextFirstName.getText().toString().trim());
+        candidate.setLastName(mEditTextLastName.getText().toString().trim());
+        candidate.setDateOfBirth(mEditTextDob.getText().toString().trim());
+        candidate.setMobileNumber(mEditTextMobile.getText().toString().trim());
+        candidate.setGender(mRegisterGender);
+
+
+
+
+
 
     }
 
@@ -237,6 +280,7 @@ public class CandidateProfileActivity extends AppCompatActivity
         mEditTextMobile.setEnabled(true);
         mRatioButtonFemale.setClickable(true);
         mRadioButtonMale.setClickable(true);
+        mImageViewCandidateImage.setEnabled(true);
 
     }
 
@@ -249,6 +293,7 @@ public class CandidateProfileActivity extends AppCompatActivity
 
         mRatioButtonFemale.setClickable(false);
         mRadioButtonMale.setClickable(false);
+        mImageViewCandidateImage.setEnabled(false);
 
     }
 
@@ -294,4 +339,44 @@ public class CandidateProfileActivity extends AppCompatActivity
 
        }
    }
+
+
+
+
+    /**
+     * method to handle image result
+     * @param requestCode image request code
+     * @param resultCode result status
+     * @param data intent data
+     */
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+            if (resultCode == RESULT_OK) {
+
+
+                Uri resultUri = result.getUri();
+
+                // setting the image to imageView
+                mImageViewCandidateImage.setImageURI(resultUri);
+
+
+                // converting the image to bytes Arrays
+
+                mImageViewCandidateImage.setDrawingCacheEnabled(true);
+                mImageViewCandidateImage.buildDrawingCache();
+                Bitmap bitmap=mImageViewCandidateImage.getDrawingCache();
+                ByteArrayOutputStream outputStream=new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.PNG,100,outputStream);
+
+                mCandidateImageBytes = outputStream.toByteArray();
+
+            } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+                Exception error = result.getError();
+                Log.d(TAG, "onActivityResult: " + error);
+            }
+        }
+    }
 }

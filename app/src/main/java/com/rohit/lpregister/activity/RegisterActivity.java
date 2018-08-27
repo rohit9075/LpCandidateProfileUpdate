@@ -37,10 +37,10 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         RadioGroup.OnCheckedChangeListener{
 
     private static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 1001;
-
+    byte [] mCandidateImageBytes;
     private static final String TAG = "RegisterActivity";
 
-    byte [] mCandidateImageBytes;
+
 
     Candidate mCandidate;
     String  mRegisterGender;
