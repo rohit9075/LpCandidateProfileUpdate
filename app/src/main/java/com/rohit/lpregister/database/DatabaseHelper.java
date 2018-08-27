@@ -119,27 +119,32 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return cursorCount > 0;
 
     }
-//
-//    public boolean updateCandidate(User candidate, byte[] data) {
-//        SQLiteDatabase db = this.getWritableDatabase();
-//        ContentValues values = new ContentValues();
-//        //values.put(COLUMN_CANDIDATE_ID,candidate.getId());
-//        values.put(COLUMN_CANDIDATE_FIRST_NAME, candidate.getmFirstName());
-//        values.put(COLUMN_CANDIDATE_LAST_NAME, candidate.getmLastName());
-//        values.put(COLUMN_CANDIDATE_DATE_OF_BIRTH, candidate.getmDob());
-//        values.put(COLUMN_CANDIDATE_EMAIL, candidate.getmEmailId());
-//        values.put(COLUMN_CANDIDATE_PHONE,candidate.getmMobileNo());
-//        values.put(COLUMN_CANDIDATE_PASSWORD, candidate.getmPassword());
-//
-//        values.put(COLUMN_CANDIDATE_IMAGE,data);
-//        // updating row
-//        /*db.update(TABLE_CAN, values,null,null);
-//        db.close();*/
-//
-//        return db.update(TABLE_CAN, values, COLUMN_CANDIDATE_EMAIL + "=?", new String[]{candidate.getmEmailId()}) == 1;
-//
-//    }
-//
+
+    public boolean updateCandidate(Candidate candidate, byte[] data) {
+
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        //values.put(COLUMN_CANDIDATE_ID,candidate.getId());
+        values.put(Constants.COLUMN_CANDIDATE_EMAIL, candidate.getEmailId());
+        values.put(Constants.COLUMN_CANDIDATE_FIRST_NAME, candidate.getFirstName());
+        values.put(Constants.COLUMN_CANDIDATE_LAST_NAME, candidate.getLastName());
+        values.put(Constants.COLUMN_CANDIDATE_DATE_OF_BIRTH, candidate.getDateOfBirth());
+        values.put(Constants.COLUMN_CANDIDATE_PHONE,candidate.getMobileNumber());
+        values.put(Constants.COLUMN_CANDIDATE_GENDER, candidate.getGender());
+
+        values.put(Constants.COLUMN_CANDIDATE_IMAGE, data);
+        // updating row
+        /*db.update(TABLE_CAN, values,null,null);
+        db.close();*/
+
+        return db.update(Constants.TABLE_CANDIDATE,
+                values,
+                Constants.COLUMN_CANDIDATE_EMAIL + "=?",
+                new String[]{candidate.getEmailId()}) == 1;
+
+    }
+
 //    public boolean delete(String id)
 //    {
 //        String[] columns = {COLUMN_CANDIDATE_ID};

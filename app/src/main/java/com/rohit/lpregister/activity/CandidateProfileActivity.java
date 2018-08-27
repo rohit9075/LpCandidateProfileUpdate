@@ -23,6 +23,7 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.rohit.lpregister.R;
 import com.rohit.lpregister.database.Constants;
@@ -65,6 +66,10 @@ public class CandidateProfileActivity extends AppCompatActivity
     NavigationView navigationView;
     View header;
 
+    Candidate candidate;
+
+    static String mEmailFromIntent;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,7 +95,9 @@ public class CandidateProfileActivity extends AppCompatActivity
 
         initObject(); // initObject method call
 
-        getCandidateDataFromDb(getIntent().getStringExtra("email"));
+        mEmailFromIntent = getIntent().getStringExtra("email");
+
+        getCandidateDataFromDb(mEmailFromIntent);
 
         mImageViewCandidateImage.setEnabled(false);
 
@@ -106,6 +113,7 @@ public class CandidateProfileActivity extends AppCompatActivity
 
      mEditUpdateSwitch.setOnCheckedChangeListener(this);
         mImageViewCandidateImage.setOnClickListener(this);
+        mRadioGroupGender.setOnCheckedChangeListener(this);
 
     }
 
@@ -231,25 +239,22 @@ public class CandidateProfileActivity extends AppCompatActivity
      * getData() method definition
      */
     public void getData(){
+
         String mRegisterGender =null;
-        Candidate candidate = new Candidate();
+
+        candidate = new Candidate();
 
         if (mRadioGroupGender != null) {
-
 
             mRegisterGender = mRadioButton.getText().toString().trim();
         }
 
+        candidate.setEmailId(mEditTextEmail.getText().toString().trim());
         candidate.setFirstName(mEditTextFirstName.getText().toString().trim());
         candidate.setLastName(mEditTextLastName.getText().toString().trim());
         candidate.setDateOfBirth(mEditTextDob.getText().toString().trim());
         candidate.setMobileNumber(mEditTextMobile.getText().toString().trim());
         candidate.setGender(mRegisterGender);
-
-
-
-
-
 
     }
 
@@ -264,7 +269,13 @@ public class CandidateProfileActivity extends AppCompatActivity
             else {
 
 
+                getData();
+                boolean status = mDatabaseHelper.updateCandidate(candidate,mCandidateImageBytes);
                 disableEditText();
+                getCandidateDataFromDb(mEmailFromIntent);
+                if (status){
+                    Toast.makeText(this, "Data updated Successfully", Toast.LENGTH_SHORT).show();
+                }
 //                updateCandidateProfile();
 
             }
