@@ -4,8 +4,13 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.BitmapShader;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Shader;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -33,8 +38,7 @@ import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.io.ByteArrayOutputStream;
-
-import de.hdodenhof.circleimageview.CircleImageView;
+import java.io.IOException;
 
 public class CandidateProfileActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,View.OnClickListener, RadioGroup.OnCheckedChangeListener,
@@ -364,15 +368,33 @@ public class CandidateProfileActivity extends AppCompatActivity
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+
             CropImage.ActivityResult result = CropImage.getActivityResult(data);
+
             if (resultCode == RESULT_OK) {
 
 
                 Uri resultUri = result.getUri();
 
-                // setting the image to imageView
-                mImageViewCandidateImage.setImageURI(resultUri);
+                BitmapFactory.Options options = new BitmapFactory.Options();
 
+                options.inSampleSize = 4;
+
+                try {
+                 Bitmap  bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), resultUri);
+                    Bitmap circleBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+                    BitmapShader shader = new BitmapShader (bitmap,  Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+                    Paint paint = new Paint();
+                    paint.setShader(shader);
+                    paint.setAntiAlias(true);
+                    Canvas c = new Canvas(circleBitmap);
+                    c.drawCircle(bitmap.getWidth()/2, bitmap.getHeight()/2, bitmap.getWidth()/2, paint);
+
+                    mImageViewCandidateImage.setImageBitmap(circleBitmap);
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
                 // converting the image to bytes Arrays
 

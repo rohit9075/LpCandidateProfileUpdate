@@ -22,13 +22,12 @@
 
 
             <ImageView
-                xmlns:app="http://schemas.android.com/apk/res-auto"
                 android:id="@+id/update_imageview"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_marginTop="@dimen/dimen_20dp"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_launcher_foreground" />
+                android:src="@drawable/ic_profile_placeholder"/>
 
 
                 <LinearLayout

@@ -4,8 +4,14 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.BitmapShader;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Shader;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.ActivityCompat;
@@ -15,6 +21,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
@@ -29,9 +36,9 @@ import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Objects;
 
-import de.hdodenhof.circleimageview.CircleImageView;
 
 public class RegisterActivity extends AppCompatActivity implements View.OnClickListener,
         RadioGroup.OnCheckedChangeListener{
@@ -50,7 +57,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
     private Button mButtonRegister;
     private TextView mTextViewAlreadyMember;
     // ImageView Instance Variable
-    private CircleImageView mImageViewCandidateImage;
+    private ImageView mImageViewCandidateImage;
     // RadioGroup object Declaration.
     private RadioGroup mRadioGroupGender;
     // RadioButton object Declaration.
@@ -346,12 +353,27 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
             CropImage.ActivityResult result = CropImage.getActivityResult(data);
             if (resultCode == RESULT_OK) {
 
-
                 Uri resultUri = result.getUri();
 
-                // setting the image to imageView
-                mImageViewCandidateImage.setImageURI(resultUri);
+                BitmapFactory.Options options = new BitmapFactory.Options();
 
+                options.inSampleSize = 4;
+
+                try {
+                    Bitmap  bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), resultUri);
+                    Bitmap circleBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+                    BitmapShader shader = new BitmapShader (bitmap,  Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+                    Paint paint = new Paint();
+                    paint.setShader(shader);
+                    paint.setAntiAlias(true);
+                    Canvas c = new Canvas(circleBitmap);
+                    c.drawCircle(bitmap.getWidth()/2, bitmap.getHeight()/2, bitmap.getWidth()/2, paint);
+
+                    mImageViewCandidateImage.setImageBitmap(circleBitmap);
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
                 // converting the image to bytes Arrays
 
