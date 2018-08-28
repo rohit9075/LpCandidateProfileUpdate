@@ -151,6 +151,7 @@ public class CandidateProfileActivity extends AppCompatActivity
 
     public void initObject(){
 
+        // database helper object instantiation
       mDatabaseHelper = new DatabaseHelper(this);
 
 
